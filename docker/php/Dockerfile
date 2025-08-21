@@ -30,10 +30,6 @@ FROM base AS build
 
 COPY ./laravel /var/www/html/
 
-RUN php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache 
-
 RUN composer install --no-interaction --optimize-autoloader
 
 RUN chown -R www-data:www-data /var/www/html \
