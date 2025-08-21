@@ -1,0 +1,10 @@
+# Laravel
+/laravel/composer.lock
+/laravel/vendor
+/laravel/node_modules
+/laravel/npm-debug.log
+/laravel/yarn-error.log
+/laravel/.env
+
+# Docker and Jenkins
+.env
