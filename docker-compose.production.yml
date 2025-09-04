@@ -1,6 +1,6 @@
 services:
   app:
-    image: ghcr.io/adamalfiansyah/belajar-docker-dev/app:latest
+    image: ghcr.io/adamalfiansyah/belajar-docker/app:latest
     environment:
       APP_ENV: ${APP_ENV}
       APP_DEBUG: ${APP_DEBUG}
@@ -24,7 +24,7 @@ services:
       - mysql
 
   nginx:
-    image: ghcr.io/adamalfiansyah/belajar-docker-dev/laravel-nginx-dev:latest
+    image: ghcr.io/adamalfiansyah/belajar-docker/laravel-nginx:latest
     container_name: ${NGINX_SERVICE_NAME}
     ports:
       - "${NGINX_PORT}:80"

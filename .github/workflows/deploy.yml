@@ -33,7 +33,7 @@ jobs:
       # Build & push Nginx image
       - name: Build & Push Nginx
         run: |
-          IMAGE_NGINX=ghcr.io/${{ github.repository }}/laravel-nginx-dev:latest
+          IMAGE_NGINX=ghcr.io/${{ github.repository }}/laravel-nginx:latest
           docker build -t $IMAGE_NGINX -f docker/nginx/Dockerfile ./docker/nginx
           docker push $IMAGE_NGINX
 
