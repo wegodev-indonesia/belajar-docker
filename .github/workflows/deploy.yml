@@ -1,0 +1,58 @@
+name: Laravel CI/CD to EC2 with GHCR
+
+on:
+  push:
+    branches:
+      - main   # jalankan deploy tiap ada push ke branch main
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout source code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Login ke GitHub Container Registry
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Build & push image ke GHCR
+      - name: Build and Push Docker image
+        run: |
+          IMAGE_NAME=ghcr.io/${{ github.repository }}/app:latest
+          docker build -t $IMAGE_NAME -f docker/php/Dockerfile .
+          docker push $IMAGE_NAME
+
+      # Build & push Nginx image
+      - name: Build & Push Nginx
+        run: |
+          IMAGE_NGINX=ghcr.io/${{ github.repository }}/laravel-nginx-dev:latest
+          docker build -t $IMAGE_NGINX -f docker/nginx/Dockerfile ./docker/nginx
+          docker push $IMAGE_NGINX
+
+      # Deploy ke EC2
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            IMAGE_NAME=ghcr.io/${{ github.repository }}/app:latest
+            echo "Logging in to GHCR..."
+            echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            echo "Pulling latest image..."
+            cd /home/ec2-user/app
+            docker pull $IMAGE_NAME
+
+            echo "Restarting containers..."
+            docker-compose -f docker-compose.production.yml down
+            docker-compose -f docker-compose.production.yml up -d
